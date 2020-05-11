@@ -15,9 +15,6 @@ import cv2 as cv
 import numpy as np
 import time
 import logging
-from itertools import count
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # Third Party Imports
 # from object_tracking.OpenCV.image_process import imageProcess

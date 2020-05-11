@@ -1,14 +1,13 @@
 '''
 Ryan Gutmann
 ME 800: Object Tracking with CrazyFlie 2.1
-Yaw Control
+Distance Control
 Updated: 4/13/20
 '''
 
 '''
 The following code uses information from the FPV camera to control
-the yaw rate of the CrazyFlie such that it centers itself on the 
-object. 
+the altitude of the CrazyFlie in order to center the camera on the object.
 '''
 
 # Standard Library Imports
@@ -23,6 +22,8 @@ import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from image_process import imageProcess
+
+# Unique Radio Identifier
 URI = 'radio://0/80/2M'
 
 # Only Output Errors from the Logging Framework
@@ -41,13 +42,15 @@ ip = imageProcess()
 l_b = np.array([130,0,0])
 u_b = np.array([180,255,255])
 
-# Tolerance for Yaw Control
-tol_yaw = 50
+# Parameters for Altitude Control
+tol_alt = 50
+
+# Initialize Height
+h = 0.4
 
 # Center of Frame
 c_frame_x = 320
 c_frame_y = 240
-
 
 with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
     cf = scf.cf
@@ -74,6 +77,7 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         # Generate Mask
         mask_in = cv.inRange(hsv, l_b, u_b)
 
+	
         # Generate New Mask with a Single Blob
         mask_out = ip.select_largest_obj(mask_in)
 
@@ -84,14 +88,16 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         cv.circle(frame,(cx,cy),2,(0,0,255),-1)
         cv.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),5)
 
-        # Command Motion of the CrazyFlie
-        if abs(cx - c_frame_x) >= tol_yaw:
-            if cx - c_frame_x<=0:
-                cf.commander.send_hover_setpoint(0,0,-36,0.4)
+        # Forward Velocity
+        if abs(c_frame_y - cy) >= tol_alt:
+            if c_frame_y - cy >= 0:
+                h = h - 0.05
             else:
-                cf.commander.send_hover_setpoint(0,0,36,0.4)
-        else:
-            cf.commander.send_hover_setpoint(0,0,0,0.4)
+                h = h + 0.05
+
+        # Command Motion of CrazyFlie
+        cf.commander.send_hover_setpoint(0,0,0,h)
+
 
         # Show Camera Feed
         cv.imshow("Frame",frame)
