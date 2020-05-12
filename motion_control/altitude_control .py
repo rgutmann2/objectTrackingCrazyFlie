@@ -43,7 +43,7 @@ l_b = np.array([130,0,0])
 u_b = np.array([180,255,255])
 
 # Parameters for Altitude Control
-tol_alt = 50
+tol_alt = 200
 
 # Initialize Height
 h = 0.4
@@ -88,12 +88,19 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         cv.circle(frame,(cx,cy),2,(0,0,255),-1)
         cv.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),5)
 
-        # Forward Velocity
+        # Altitude
         if abs(c_frame_y - cy) >= tol_alt:
-            if c_frame_y - cy >= 0:
-                h = h - 0.05
+            if c_y - c_frame_y >= 0:
+                h = h - 0.0005
             else:
-                h = h + 0.05
+                h = h + 0.0005
+
+        # Saturate Altitude Commands to Prevent Crashes
+        if h > 1:
+            h = 1
+
+        if h < 0.3:
+            h = 0.3
 
         # Command Motion of CrazyFlie
         cf.commander.send_hover_setpoint(0,0,0,h)
