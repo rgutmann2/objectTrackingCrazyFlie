@@ -1,7 +1,7 @@
 '''
 Ryan Gutmann
 ME 800: Object Tracking with CrazyFlie 2.1
-Updated: 3/24/20
+Updated: 5/15/20
 Object Detection Test
 '''
 
@@ -24,9 +24,6 @@ import time
 # Import class for image processing
 from image_process import imageProcess
 
-def nothing(x):
-    pass
-
 # Create Object of the class imageProcess
 ip = imageProcess()
 
@@ -37,20 +34,17 @@ u_b = np.array([180,255,255])
 while True:
     # Read the test image
     frame = cv.imread('test.JPG')
-    (height,width) = frame.shape[:2]
-    width = int(width/2)
-    height = int(height/2)
-    cv.circle(frame,(width,height),5,(0,0,255),-1)
 
     # Convert colored image to HSV Image
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
     # Generate Mask
     mask_in = cv.inRange(hsv, l_b, u_b)
+    cv.imshow('Mask In',mask_in)
 
     # Generate New Mask with a Single Blob
     mask_out = ip.select_largest_obj(mask_in)
-    cv.imshow('mask_out',mask_out)
+    cv.imshow('Mask Out',mask_out)
 
     # Draw Bounding Rectangle On mask_out
     x,y,w,h = cv.boundingRect(mask_out)

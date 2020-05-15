@@ -24,7 +24,7 @@ import time
 from image_process import imageProcess
 
 # Create Class for Camera
-cap = cv.VideoCapture(1)
+cap = cv.VideoCapture(2)
 
 # Create Object of the class imageProcess
 ip = imageProcess()
@@ -37,9 +37,6 @@ u_b = np.array([180,200,255])
 while True:
     # Capture Image from FPV Camera
     ret, frame = cap.read()
-    (height,width) = frame.shape[:2]
-    width = int(width/2)
-    height = int(height/2)
 
     # Convert colored image to HSV Image
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)

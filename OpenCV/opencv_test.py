@@ -1,13 +1,13 @@
 '''
 Ryan Gutmann
 ME 800: Object Tracking with CrazyFlie 2.1
-3/31/20
+Updated: 3/31/20
 Camera Test with OpenCV
 '''
 
 '''
 This code simply captures the video feed from 
-a camera. Simply change the path in input of
+a camera. Simply change the index in the input of
 VideoCapture to choose a different camera.
 '''
 

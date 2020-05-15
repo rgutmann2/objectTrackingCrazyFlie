@@ -43,14 +43,23 @@ l_b = np.array([130,0,0])
 u_b = np.array([180,255,255])
 
 # Parameters for Altitude Control
-tol_alt = 200
+tol_alt = 50
+dt = 0.1
+altitude_velocity = 0.001
 
 # Initialize Height
 h = 0.4
 
 # Center of Frame
-c_frame_x = 320
-c_frame_y = 240
+center_y = 240
+
+# Test camera before takeoff
+for i in range(2):
+    _, frame = cap.read()
+    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    mask_in = cv.inRange(hsv, l_b, u_b)
+    mask_out = ip.select_largest_obj(mask_in)
+    time.sleep(1)
 
 with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
     cf = scf.cf
@@ -83,17 +92,17 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
 
         # Draw Bounding Rectangle
         x,y,w,h = cv.boundingRect(mask_out)
-        cx = int(x + w/2)
-        cy = int(y + h/2)
-        cv.circle(frame,(cx,cy),2,(0,0,255),-1)
+        obj_x = int(x + w/2)
+        obj_y = int(y + h/2)
+        cv.circle(frame,(obj_x,obj_y),2,(0,0,255),-1)
         cv.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),5)
 
         # Altitude
-        if abs(c_frame_y - cy) >= tol_alt:
-            if c_y - c_frame_y >= 0:
-                h = h - 0.0005
+        if abs(obj_y - center_y) > tol_alt:
+            if obj_y - center_y > 0:
+                h -= altitude_velocity*dt
             else:
-                h = h + 0.0005
+                h += altitude_velocity*dt
 
         # Saturate Altitude Commands to Prevent Crashes
         if h > 1:
@@ -106,11 +115,12 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf.commander.send_hover_setpoint(0,0,0,h)
 
 
-        # Show Camera Feed
+        # Show Camera Feedhover
         cv.imshow("Frame",frame)
         
-        time.sleep(0.05)
+        time.sleep(dt)
 
+        # Press "esc" to land crazyFlie 
         key = cv.waitKey(1) & 0xFF
         if key == 27:
             break

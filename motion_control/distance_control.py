@@ -23,9 +23,6 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from image_process import imageProcess
 
-# Create Function for Appending area data
-index = count()
-
 # Unique Radio Identifier
 URI = 'radio://0/80/2M'
 
@@ -47,7 +44,15 @@ u_b = np.array([180,255,255])
 
 # Parameters for Yaw Control
 tol_area = 50000
-desired_area = 200000
+desired_area = 100000
+
+# Test camera before takeoff
+for i in range(2):
+    _, frame = cap.read()
+    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    mask_in = cv.inRange(hsv, l_b, u_b)
+    mask_out = ip.select_largest_obj(mask_in)
+    time.sleep(1)
 
 with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
     cf = scf.cf
@@ -59,7 +64,7 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
 
     for y in range(8):
         cf.commander.send_hover_setpoint(0, 0, 0, y / 20)
-        time.sleep(0.05)
+        time.sleep(0.1)
 
     while True:
         # Capture Image from FPV Camera
@@ -98,7 +103,7 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
             forward_vel = 0
 
         # Command Motion of CrazyFlie
-        cf.commander.send_hover_setpoint(forward_vel,0,0,0.4)
+        cf.commander.send_velocity_world_setpoint(forward_vel,0,0,0)
 
 
         # Show Camera Feed
