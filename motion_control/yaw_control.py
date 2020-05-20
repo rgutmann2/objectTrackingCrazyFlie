@@ -18,11 +18,12 @@ import time
 import logging
 
 # Third Party Imports
-# from object_tracking.OpenCV.image_process import imageProcess
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from image_process import imageProcess
+
+# Define URI
 URI = 'radio://0/80/2M'
 
 # Only Output Errors from the Logging Framework
@@ -47,6 +48,14 @@ tol_yaw = 50
 # Center of Frame
 c_frame_x = 320
 c_frame_y = 240
+
+# Test camera before takeoff
+for i in range(2):
+    ret, frame = cap.read()
+    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    mask_in = cv.inRange(hsv, l_b, u_b)
+    mask_out = ip.select_largest_obj(mask_in)
+    time.sleep(1)
 
 
 with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:

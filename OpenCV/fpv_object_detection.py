@@ -31,7 +31,8 @@ ip = imageProcess()
 
 # Upper and Lower Bounds for Detecting Red
 l_b = np.array([130,50,50])
-u_b = np.array([180,200,255])
+u_b = np.array([180,255,255])
+
 
 
 while True:

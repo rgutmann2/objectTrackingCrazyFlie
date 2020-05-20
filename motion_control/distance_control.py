@@ -68,7 +68,7 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
 
     while True:
         # Capture Image from FPV Camera
-        _, frame = cap.read()
+        ret, frame = cap.read()
 
         # Draw Rectangle to Represent Tolerance
         cv.rectangle(frame,(270,190),(370,290),(0,255,0),2)
@@ -103,7 +103,7 @@ with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
             forward_vel = 0
 
         # Command Motion of CrazyFlie
-        cf.commander.send_velocity_world_setpoint(forward_vel,0,0,0)
+        cf.commander.send_hover_setpoint(forward_vel,0,0,0.4)
 
 
         # Show Camera Feed
